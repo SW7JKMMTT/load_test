@@ -63,13 +63,13 @@
           </elementProp>
           <elementProp name="routes" elementType="Argument">
             <stringProp name="Argument.name">routes</stringProp>
-            <stringProp name="Argument.value">1000</stringProp>
+            <stringProp name="Argument.value">500</stringProp>
             <stringProp name="Argument.desc">number of routes</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="waypoints" elementType="Argument">
             <stringProp name="Argument.name">waypoints</stringProp>
-            <stringProp name="Argument.value">20</stringProp>
+            <stringProp name="Argument.value">100</stringProp>
             <stringProp name="Argument.desc">number of waypoints per route</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
@@ -634,6 +634,10 @@
           </ResultCollector>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">1000</stringProp>
+        </ConstantTimer>
+        <hashTree/>
       </hashTree>
       <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
