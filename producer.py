@@ -4,8 +4,9 @@ from faker import Factory
 from urllib.parse import urljoin
 import requests
 from pprint import pprint
-import gpxpy
 import time
+import os
+import sys
 
 fake = Factory.create('en_US')
 base_path = "/services-1.0.0"
@@ -46,10 +47,6 @@ def make_route(server, auth_header, vehicle_id):
     pprint(r.json())
     return r.json()['id']
 
-def load_gpx_data(waypoints):
-    with open(waypoints, 'r') as f:
-        return gpxpy.parse(f)
-
 def make_waypoint(server, auth_header, route_id, latitude, longitude):
     waypoint_data = {
             "latitude" : latitude,
@@ -59,12 +56,67 @@ def make_waypoint(server, auth_header, route_id, latitude, longitude):
     r = requests.post(server + '/route/' + route_id + '/waypoint', json=waypoint_data, headers=auth_header)
     pprint(r.json())
 
+def get_route_from_google_maps(start, end):
+    import googlemaps
+    import polyline
+    if not 'GOOGLE_MAPS_API_KEY' in os.environ.keys():
+        print("Google Maps API Key must be in environment variables as: GOOGLE_MAPS_API_KEY")
+        sys.exit(0)
+    api_key = os.environ['GOOGLE_MAPS_API_KEY']
+    gmaps = googlemaps.Client(key=api_key)
+    directions = gmaps.directions(start, end, mode="driving", alternatives=True)
+    route = None
+    if len(directions) > 1:
+        print("Multiple routes found.\nChoose one:")
+        for i, route in enumerate(directions):
+            distance = sum([leg['distance']['value'] for leg in route['legs']])
+            print('  {}. {} ({:.2f} km)'.format(i, route['summary'], distance / 1000))
+        while True:
+            choice = input('Choose #: ')
+            if choice.isdigit() and int(choice) in range(len(directions)):
+                route = directions[int(choice)]
+                break
+    else:
+        route = directions[0]
+
+    duration = sum([leg['duration']['value'] for leg in route['legs']])
+    coordinates = []
+    for leg in route['legs']:
+        for step in leg['steps']:
+            pline = step['polyline']['points']
+            coordinates.extend(polyline.decode(pline))
+    return coordinates, duration
+
+def get_route_from_gpx_file(file):
+    import gpxpy
+    gpx = None
+    with open(waypoints, 'r') as f:
+        gpx = gpxpy.parse(f)
+    coordinates = []
+    for segment in gpx.tracks[0].segments:
+        for point in segment.points:
+            coordinates.append((point.latitude, point.longitude))
+    return coordinates, len(coordinates)
+
 @begin.start
 def main(server: 'URL of the server' = "http://172.25.11.114:8080",
          user: 'If not supplied a new user will be made' = (None, None),
          superuser: 'Used to make new user' = ("deadpool", "hunter2"),
-         waypoints: 'GPX file to read waypoints from' = "waypoints.gpx",
-         waypoint_delay: 'Delay between POSTing waypoints' = 1):
+         waypoints: 'GPX file to read waypoints from' = None,
+         delay: 'Manual delay between POSTing waypoints' = 0,
+         start: 'coordinates or address of starting point' = None,
+         end: 'coordinates or address of ending point' = None):
+    points = None
+    duration = 0
+    if start and end:
+        points, duration = get_route_from_google_maps(start, end)
+    elif waypoints:
+        points, duration = get_route_from_gpx_file(waypoints)
+    else:
+        print("You must use either start and end point or gpx file with waypoints.")
+        return
+    delay = delay if delay > 0 else duration / len(points)
+
     server = urljoin(server, base_path)
     print(server)
     if user[0] is None:
@@ -72,10 +124,7 @@ def main(server: 'URL of the server' = "http://172.25.11.114:8080",
     auth_header = authenticate_user(server, user)
     vehicle_id = make_vehicle(server, auth_header)
     route_id = make_route(server, auth_header, vehicle_id)
-    gpx = load_gpx_data(waypoints)
-    for segment in gpx.tracks[0].segments:
-        for point in segment.points:
-            make_waypoint(server, auth_header, route_id, point.latitude, point.longitude)
-            time.sleep(waypoint_delay)
 
-
+    for point in points:
+        make_waypoint(server, auth_header, route_id, latitude=point[0], longitude=point[1])
+        time.sleep(delay)
