@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from pymongo import MongoClient
 
 client = MongoClient('172.25.11.114', 27017)
