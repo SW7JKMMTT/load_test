@@ -56,7 +56,7 @@ def make_waypoint(server, auth_header, route_id, latitude, longitude):
     r = requests.post(server + '/route/' + route_id + '/waypoint', json=waypoint_data, headers=auth_header)
     pprint(r.json())
 
-def get_route_from_google_maps(start, end):
+def get_route_from_google_maps(start, end, force=False):
     import googlemaps
     import polyline
     if not 'GOOGLE_MAPS_API_KEY' in os.environ.keys():
@@ -66,7 +66,7 @@ def get_route_from_google_maps(start, end):
     gmaps = googlemaps.Client(key=api_key)
     directions = gmaps.directions(start, end, mode="driving", alternatives=True)
     route = None
-    if len(directions) > 1:
+    if not force and len(directions) > 1:
         print("Multiple routes found.\nChoose one:")
         for i, route in enumerate(directions):
             distance = sum([leg['distance']['value'] for leg in route['legs']])
@@ -78,7 +78,6 @@ def get_route_from_google_maps(start, end):
                 break
     else:
         route = directions[0]
-
     duration = sum([leg['duration']['value'] for leg in route['legs']])
     coordinates = []
     for leg in route['legs']:
@@ -105,18 +104,18 @@ def main(server: 'URL of the server' = "http://172.25.11.114:8080",
          waypoints: 'GPX file to read waypoints from' = None,
          delay: 'Manual delay between POSTing waypoints' = 0,
          start: 'coordinates or address of starting point' = None,
-         end: 'coordinates or address of ending point' = None):
+         end: 'coordinates or address of ending point' = None,
+         non_interactive: 'Disable user input (force choices to first)' = False):
     points = None
     duration = 0
     if start and end:
-        points, duration = get_route_from_google_maps(start, end)
+        points, duration = get_route_from_google_maps(start, end, force=non_interactive)
     elif waypoints:
         points, duration = get_route_from_gpx_file(waypoints)
     else:
         print("You must use either start and end point or gpx file with waypoints.")
         return
     delay = delay if delay > 0 else duration / len(points)
-
     server = urljoin(server, base_path)
     print(server)
     if user[0] is None:
