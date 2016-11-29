@@ -4,6 +4,7 @@ from faker import Factory
 from urllib.parse import urljoin
 import requests
 from pprint import pprint
+from datetime import timedelta
 import time
 import os
 import sys
@@ -21,29 +22,33 @@ def make_new_user(server, superuser):
     }
 
     r = requests.post(server + '/user', json=user_data, headers=su_auth_header)
+    print('\n--{:=^50}--'.format(' New User Created '))
     pprint(r.json())
     return r.json()['username'], "hunter2"
 
 def authenticate_user(server, user):
     user_data = {"username": user[0], "password": user[1]}
     r = requests.post(server + '/auth', json=user_data)
+    print('\n--{:=^50}--'.format(' User Authenticated '))
     pprint(r.json())
     return {"Authorization": "Sleepy token=" + r.json()['token']}
 
 def make_vehicle(server, auth_header):
     car_data = {
             "make" : fake.company(),
-            "model" : fake.word(),
+            "model" : fake.word().capitalize(),
             "vintage" : fake.year(),
             "vin" : fake.ean13()
     }
     r = requests.post(server + '/vehicle', json=car_data, headers=auth_header)
+    print('\n--{:=^50}--'.format(' Vehicle Created '))
     pprint(r.json())
     return r.json()['id']
 
 def make_route(server, auth_header, vehicle_id):
     route_data = { "vehicleid": vehicle_id }
     r = requests.post(server + '/route', json=route_data, headers=auth_header)
+    print('\n--{:=^50}--'.format(' Route Created '))
     pprint(r.json())
     return r.json()['id']
 
@@ -54,6 +59,7 @@ def make_waypoint(server, auth_header, route_id, latitude, longitude):
             "timestamp": int(time.time() * 1000)
     }
     r = requests.post(server + '/route/' + route_id + '/waypoint', json=waypoint_data, headers=auth_header)
+    print('\n--{:=^50}--'.format(' Waypoint Created '))
     pprint(r.json())
 
 def get_route_from_google_maps(start, end, force=False):
@@ -124,6 +130,7 @@ def main(server: 'URL of the server' = "http://172.25.11.114:8080",
     vehicle_id = make_vehicle(server, auth_header)
     route_id = make_route(server, auth_header, vehicle_id)
 
-    for point in points:
+    for i, point in enumerate(points):
         make_waypoint(server, auth_header, route_id, latitude=point[0], longitude=point[1])
+        print('{} out of {} | estimated time left: {}'.format(i+1, len(points), timedelta(seconds= delay * (len(points) - i))))
         time.sleep(delay)
