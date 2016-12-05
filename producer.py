@@ -103,12 +103,12 @@ def get_route_from_gpx_file(file):
             coordinates.append((point.latitude, point.longitude))
     return coordinates, len(coordinates)
 
-@begin.start
+@begin.start(auto_convert=True)
 def main(server: 'URL of the server' = "http://172.25.11.114:8080",
          user: 'If not supplied a new user will be made' = (None, None),
          superuser: 'Used to make new user' = ("deadpool", "hunter2"),
          waypoints: 'GPX file to read waypoints from' = None,
-         delay: 'Manual delay between POSTing waypoints' = 0,
+         delay: 'Manual delay between POSTing waypoints' = 1.0,
          start: 'coordinates or address of starting point' = None,
          end: 'coordinates or address of ending point' = None,
          non_interactive: 'Disable user input (force choices to first)' = False):
