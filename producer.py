@@ -184,8 +184,8 @@ def main(server: 'URL of the server' = "http://sw708e16.cs.aau.dk",
             break
         lat = np.interp(t, times, lats)
         lon = np.interp(t, times, lons)
-        e_idx = np.searchsorted(times, t) + calc_speed_steps
-        s_idx = e_idx - calc_speed_steps
+        s_idx = min((np.searchsorted(times, t), len(times) - 1))
+        e_idx = min((s_idx + calc_speed_steps, len(times) - 1))
         t_delta = times[e_idx] - t
         r_delta = [(lat, lon)]
         r_delta.extend([(la, lo) for la, lo in zip(lats[s_idx:e_idx], lons[s_idx:e_idx])])
