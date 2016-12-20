@@ -15,7 +15,7 @@
         <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
           <collectionProp name="Arguments.arguments"/>
         </elementProp>
-        <stringProp name="HTTPSampler.domain">172.25.11.114</stringProp>
+        <stringProp name="HTTPSampler.domain">172.25.23.247</stringProp>
         <stringProp name="HTTPSampler.port">8080</stringProp>
         <stringProp name="HTTPSampler.connect_timeout"></stringProp>
         <stringProp name="HTTPSampler.response_timeout"></stringProp>
@@ -329,7 +329,7 @@
             <stringProp name="parameters"></stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="cacheKey"></stringProp>
-            <stringProp name="script">props.put(&quot;token_&quot; + ctx.getThreadNum(), vars.get(&quot;token&quot;))</stringProp>
+            <stringProp name="script">props.put(&quot;token_&quot; + (ctx.getThreadNum() + 1), vars.get(&quot;token&quot;))</stringProp>
           </JSR223PostProcessor>
           <hashTree/>
           <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
@@ -632,8 +632,8 @@
           <hashTree/>
         </hashTree>
         <RandomVariableConfig guiclass="TestBeanGUI" testclass="RandomVariableConfig" testname="Random center latitude" enabled="true">
-          <stringProp name="maximumValue">89</stringProp>
-          <stringProp name="minimumValue">-89</stringProp>
+          <stringProp name="maximumValue">49</stringProp>
+          <stringProp name="minimumValue">-49</stringProp>
           <stringProp name="outputFormat"></stringProp>
           <boolProp name="perThread">true</boolProp>
           <stringProp name="randomSeed"></stringProp>
@@ -641,8 +641,8 @@
         </RandomVariableConfig>
         <hashTree/>
         <RandomVariableConfig guiclass="TestBeanGUI" testclass="RandomVariableConfig" testname="Random center longitude" enabled="true">
-          <stringProp name="maximumValue">179</stringProp>
-          <stringProp name="minimumValue">-179</stringProp>
+          <stringProp name="maximumValue">99</stringProp>
+          <stringProp name="minimumValue">-99</stringProp>
           <stringProp name="outputFormat"></stringProp>
           <boolProp name="perThread">true</boolProp>
           <stringProp name="randomSeed"></stringProp>
@@ -728,8 +728,8 @@
                   <elementProp name="" elementType="HTTPArgument">
                     <boolProp name="HTTPArgument.always_encode">false</boolProp>
                     <stringProp name="Argument.value">{&#xd;
-	&quot;latitude&quot;  : ${center_lat}.${__Random(0,999,)},&#xd;
-	&quot;longitude&quot; : ${center_lon}.${__Random(0,999,)},&#xd;
+	&quot;latitude&quot;  : ${center_lat}.${__Random(0,99999,)},&#xd;
+	&quot;longitude&quot; : ${center_lon}.${__Random(0,99999,)},&#xd;
 	&quot;timestamp&quot; : ${__Random(1337,4201337,)}&#xd;
 }&#xd;
 </stringProp>
@@ -1002,7 +1002,7 @@
         </objProp>
         <stringProp name="filename"></stringProp>
         <longProp name="interval_grouping">500</longProp>
-        <boolProp name="graph_aggregated">false</boolProp>
+        <boolProp name="graph_aggregated">true</boolProp>
         <stringProp name="include_sample_labels"></stringProp>
         <stringProp name="exclude_sample_labels"></stringProp>
         <stringProp name="start_offset"></stringProp>
@@ -1043,7 +1043,7 @@
           </value>
         </objProp>
         <stringProp name="filename"></stringProp>
-        <longProp name="interval_grouping">10</longProp>
+        <longProp name="interval_grouping">50</longProp>
         <boolProp name="graph_aggregated">true</boolProp>
         <stringProp name="include_sample_labels"></stringProp>
         <stringProp name="exclude_sample_labels"></stringProp>
